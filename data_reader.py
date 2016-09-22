@@ -68,7 +68,7 @@ def read_data(file_path):
     non_numeric_fields = [ 'Diagnosis', 'DxCode', 'T', 'N', 'Side', 'Notes']
     category_codes = ['Hypopharynx', 'Nasopharynx', 'Oral', 'Oropharynx', 'Parotid', 'Skin', 'Larynx']
 
-    data = pd.read_csv(data_file_path)
+    data = pd.read_csv(file_path)
 
     # some columns need explicit type conversion to numerics because the csv file
     # has spaces which cause the field to be mis-parsed
