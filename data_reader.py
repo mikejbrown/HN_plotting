@@ -80,8 +80,8 @@ def output_analysis(results, name, save_analysis, base_path="analysis"):
         dname = os.path.dirname(fname)
         if not (os.path.exists(dname) and os.path.isdir(dname)):
             os.mkdir(dname)
-        with open(fname, 'w') as f:
-            f.write(results)
+        with open(fname, 'w') as file:
+            file.write(results)
     else:
         print(results)
 
@@ -91,21 +91,35 @@ def read_data(file_path):
     and assigning category labels.
     Returns: a Pandas dataframe object containing the cleaned data.
     """
-    non_numeric_fields = [ 'Diagnosis', 'DxCode', 'T', 'N', 'Side', 'Notes']
-    category_codes = ['Hypopharynx', 'Nasopharynx', 'Oral', 'Oropharynx', 'Parotid', 'Skin', 'Larynx']
+    non_numeric_fields = ['Diagnosis', 'DxCode', 'T', 'N', 'Side', 'Notes']
+    category_codes = ['Hypopharynx',
+                      'Nasopharynx',
+                      'Oral',
+                      'Oropharynx',
+                      'Parotid',
+                      'Skin',
+                      'Larynx']
 
     data = pd.read_csv(file_path)
 
     # some columns need explicit type conversion to numerics because the csv file
     # has spaces which cause the field to be mis-parsed
+    # NOTE: pylint persistently complains about no member existing, because it
+    # is stupid about recognizing pandas objects. Explicitly ignore the linter
+    # checks here because _everything is fine_!
+    # pylint: disable=E1103
     columns_which_need_munging = [c for c in data.columns
-                                    if data[c].dtype==np.dtype('O')
-                                    and c not in non_numeric_fields]
-    for c in columns_which_need_munging:
-        data[c] = pd.to_numeric(data[c], errors='coerce')
+                                  if data[c].dtype == np.dtype('O')
+                                  and c not in non_numeric_fields]
+    # pylint: enable=E1103
+    for col in columns_which_need_munging:
+        data[col] = pd.to_numeric(data[col], errors='coerce')
 
     # clean 99999 represeting missing data
+    # NOTE: same comment as above about _stupid_ pylint
+    # pylint: disable=E1103
     data = data.where(data != 99999)
+    # pylint: enable=E1103
 
     # mark 'Category' as a categorical variable and label appropriately
     data['Category'] = data['Category'].astype("category")
@@ -130,24 +144,24 @@ def time_points_for_variable(variable):
     return [variable + tp for tp in time_points]
 
 if __name__ == "__main__":
-    data_file_path = "Taste_and_QOL_data.csv"
-    save_analysis = True
+    DATA_FILE_PATH = "Taste_and_QOL_data.csv"
+    SAVE_ANALYSIS = True
 
-    data = read_data(data_file_path)
+    DATA = read_data(DATA_FILE_PATH)
 
-    for c in data.Category.sort_values().unique():
-        cat_data = data[data.Category == c]
+    for cat in DATA.Category.sort_values().unique():
+        cat_data = DATA[DATA.Category == cat]
 
-        print("*** Category: % s ***" % c)
+        print("*** Category: % s ***" % cat)
         print(cat_data[time_points_for_variable('Taste')].describe())
 
-    cols = ['Category',]
-    cols.extend(time_points_for_variable('Taste'))
-    cols.extend(time_points_for_variable('Overall_QOL'))
+    COLS = ['Category',]
+    COLS.extend(time_points_for_variable('Taste'))
+    COLS.extend(time_points_for_variable('Overall_QOL'))
 
-    summary = data[cols].groupby('Category').describe()
-    output_analysis(summary.to_csv(), 'summary-stats.csv', save_analysis)
-    summary_html = """
+    SUMMARY = DATA[COLS].groupby('Category').describe()
+    output_analysis(SUMMARY.to_csv(), 'summary-stats.csv', SAVE_ANALYSIS)
+    SUMMARY_HTML = """
     <html>
         <head>
             <title>Summary statistics</title>
@@ -156,12 +170,13 @@ if __name__ == "__main__":
             %s
         </body>
     </html>
-    """ % summary.to_html()
-    output_analysis(summary_html, 'summary-stats.html', save_analysis)
+    """ % SUMMARY.to_html()
+    output_analysis(SUMMARY_HTML, 'summary-stats.html', SAVE_ANALYSIS)
 
-    summary2 = data.groupby(['Category', 'T', 'N', 'Gender']).size().sort_values(ascending=False).unstack()
-    output_analysis(summary2.to_csv(), 'summary-stats-frequency-by-staging.csv', save_analysis)
-    summary_html = """
+    REDUCE_DATA = DATA.groupby(['Category', 'T', 'N', 'Gender'])
+    SUMMARY2 = REDUCE_DATA.size().sort_values(ascending=False).unstack()
+    output_analysis(SUMMARY2.to_csv(), 'summary-stats-frequency-by-staging.csv', SAVE_ANALYSIS)
+    SUMMARY_HTML = """
     <html>
         <head>
             <title>Summary statistics by staging</title>
@@ -170,5 +185,5 @@ if __name__ == "__main__":
             %s
         </body>
     </html>
-    """ % summary2.to_html()
-    output_analysis(summary_html, 'summary-stats-frequency-by-staging.html', save_analysis)
+    """ % SUMMARY2.to_html()
+    output_analysis(SUMMARY_HTML, 'summary-stats-frequency-by-staging.html', SAVE_ANALYSIS)
