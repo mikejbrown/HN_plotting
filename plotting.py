@@ -13,6 +13,8 @@ matplotlib.style.use('ggplot')
 
 from data_reader import read_data, time_points_for_variable
 
+default_plot_options = {'dpi': 128, 'bbox_inches': 'tight'}
+
 def output_fig(name, save_figs, base_path="images", **kwargs):
     """ If save_figs == True, saves the figure as a file of name 'base_path/name'.
     If save_figs == False, display the figure interactively instead.
@@ -38,25 +40,28 @@ if __name__ == "__main__":
     data = read_data(data_file_path)
 
     cols = time_points_for_variable('Taste')
+    time_point_labels = ["Baseline", "Wk 2", "Wk 4", "Wk 6", "FU 1", "FU 3", "FU 6", "FU 12"]
 
-    #print(data[cols].groupby('Category').describe())
+    ## Boxplots for each category
     for cat in data.Category.values.sort_values().unique():
-        odata = data[data.Category==cat][cols]
-        odata.columns = ["Baseline", "Wk 2", "Wk 4", "Wk 6", "FU 1", "FU 3", "FU 6", "FU 12"]
+        cdata = data[data.Category==cat][cols]
+        cdata.columns = time_point_labels
         plt.figure()
-        odata.boxplot()
+        cdata.boxplot()
         plt.title('Taste -- %s' % cat)
-        output_fig('boxplot-taste-%s.png'%cat, save_figs)
+        output_fig('boxplot-taste-%s.png'%cat, save_figs, **default_plot_options)
 
+    ## Bar plots with error bars
     cols.insert(0, 'Category')
     gb = data[cols].groupby('Category')
     means = gb.mean()
-    means.columns = ["Baseline", "Wk 2", "Wk 4", "Wk 6", "FU 1", "FU 3", "FU 6", "FU 12"]
+    means.columns = time_point_labels
     means = means
     errors = gb.std()
-    errors.columns = ["Baseline", "Wk 2", "Wk 4", "Wk 6", "FU 1", "FU 3", "FU 6", "FU 12"]
+    errors.columns = time_point_labels
     errors = errors
     fig, ax = plt.subplots()
     means.plot.bar(yerr=errors, ax=ax)
+    plt.title('Taste ($1 \sigma$ error bars)')
     plt.legend(loc=(1.1,0.2))
-    output_fig('barplot-errorbar.png', save_figs)
+    output_fig('barplot-errorbar.png', save_figs, **default_plot_options)
