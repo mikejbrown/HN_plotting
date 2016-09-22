@@ -65,3 +65,23 @@ if __name__ == "__main__":
     plt.title('Taste ($1 \sigma$ error bars)')
     plt.legend(loc=(1.1,0.2))
     output_fig('barplot-errorbar.png', save_figs, **default_plot_options)
+
+    ## Histograms
+    dc = data[time_points_for_variable('Taste')]
+    dc.columns = time_point_labels
+    plt.figure()
+    dc.plot.hist(stacked=True, cumulative=True)
+    plt.legend(loc=(1.1,0.2))
+    plt.xlabel('Taste')
+    plt.title('Cumulative frequency of taste score')
+    output_fig('histogram.png', save_figs, **default_plot_options)
+
+    for cat in data.Category.values.sort_values().unique():
+        dc = data[data.Category==cat][time_points_for_variable('Taste')]
+        dc.columns = time_point_labels
+        plt.figure()
+        dc.plot.hist(stacked=True, cumulative=True)
+        plt.legend(loc=(1.1,0.2))
+        plt.xlabel('Taste')
+        plt.title('Cumulative frequency of taste score -- %s' % cat)
+        output_fig('histogram-%s.png' % cat, save_figs, **default_plot_options)
