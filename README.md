@@ -1,3 +1,6 @@
+[![Code Climate](https://codeclimate.com/github/mikejbrown/HN_plotting/badges/gpa.svg)](https://codeclimate.com/github/mikejbrown/HN_plotting)
+[![Test Coverage](https://codeclimate.com/github/mikejbrown/HN_plotting/badges/coverage.svg)](https://codeclimate.com/github/mikejbrown/HN_plotting/coverage)
+[![Issue Count](https://codeclimate.com/github/mikejbrown/HN_plotting/badges/issue_count.svg)](https://codeclimate.com/github/mikejbrown/HN_plotting)
 About
 =====
 
