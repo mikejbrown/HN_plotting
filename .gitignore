@@ -1,5 +1,7 @@
 # Ignore data file since it contains private data
 Taste_and_QOL_data.csv
+# Ignore image output for the same reason
+images/
 
 # Created by https://www.gitignore.io/api/python
 
