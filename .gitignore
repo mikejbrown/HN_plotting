@@ -3,6 +3,8 @@ Taste_and_QOL_data.csv
 # Ignore image and analysis output for the same reason
 images/
 analysis/
+# Ignore python virtual environment directories
+myvenv/
 
 # Created by https://www.gitignore.io/api/python
 
