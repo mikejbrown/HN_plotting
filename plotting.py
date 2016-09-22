@@ -33,13 +33,9 @@ def output_fig(name, save_figs, base_path="images", **kwargs):
         plt.show()
 
 
-if __name__ == "__main__":
-    data_file_path = "Taste_and_QOL_data.csv"
-    save_figs = True
-
-    data = read_data(data_file_path)
-
-    cols = time_points_for_variable('Taste')
+def do_plots_for_variable(var):
+    """ """
+    cols = time_points_for_variable(var)
     time_point_labels = ["Baseline", "Wk 2", "Wk 4", "Wk 6", "FU 1", "FU 3", "FU 6", "FU 12"]
 
     ## Boxplots for each category
@@ -48,12 +44,13 @@ if __name__ == "__main__":
         cdata.columns = time_point_labels
         plt.figure()
         cdata.boxplot()
-        plt.title('Taste -- %s' % cat)
-        output_fig('boxplot-taste-%s.png'%cat, save_figs, **default_plot_options)
+        plt.title('%s -- %s' % (var,cat))
+        output_fig('%s-%s-boxplot.png'%(var,cat), save_figs, **default_plot_options)
 
     ## Bar plots with error bars
-    cols.insert(0, 'Category')
-    gb = data[cols].groupby('Category')
+    cols2 = cols.copy()
+    cols2.insert(0, 'Category')
+    gb = data[cols2].groupby('Category')
     means = gb.mean()
     means.columns = time_point_labels
     means = means
@@ -62,26 +59,35 @@ if __name__ == "__main__":
     errors = errors
     fig, ax = plt.subplots()
     means.plot.bar(yerr=errors, ax=ax)
-    plt.title('Taste ($1 \sigma$ error bars)')
+    plt.title('%s ($1 \sigma$ error bars)'%var)
     plt.legend(loc=(1.1,0.2))
-    output_fig('barplot-errorbar.png', save_figs, **default_plot_options)
+    output_fig('%s-barplot-errorbar.png'%var, save_figs, **default_plot_options)
 
     ## Histograms
-    dc = data[time_points_for_variable('Taste')]
+    dc = data[cols]
     dc.columns = time_point_labels
     plt.figure()
     dc.plot.hist(stacked=True, cumulative=True)
     plt.legend(loc=(1.1,0.2))
-    plt.xlabel('Taste')
-    plt.title('Cumulative frequency of taste score')
-    output_fig('histogram.png', save_figs, **default_plot_options)
+    plt.xlabel('%s'%var)
+    plt.title('Cumulative frequency of %s score'%var)
+    output_fig('%s-histogram.png'%var, save_figs, **default_plot_options)
 
     for cat in data.Category.values.sort_values().unique():
-        dc = data[data.Category==cat][time_points_for_variable('Taste')]
+        dc = data[data.Category==cat][cols]
         dc.columns = time_point_labels
         plt.figure()
         dc.plot.hist(stacked=True, cumulative=True)
         plt.legend(loc=(1.1,0.2))
-        plt.xlabel('Taste')
-        plt.title('Cumulative frequency of taste score -- %s' % cat)
-        output_fig('histogram-%s.png' % cat, save_figs, **default_plot_options)
+        plt.xlabel('%s'%var)
+        plt.title('Cumulative frequency of %s score -- %s' % (var,cat))
+        output_fig('%s-%s-histogram.png' % (var,cat), save_figs, **default_plot_options)
+
+if __name__ == "__main__":
+    data_file_path = "Taste_and_QOL_data.csv"
+    save_figs = True
+
+    data = read_data(data_file_path)
+
+    do_plots_for_variable('Taste')
+    do_plots_for_variable('Overall_QOL')
