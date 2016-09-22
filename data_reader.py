@@ -57,6 +57,14 @@ Gender codes:
     0 Male
     1 Female
 
+Chemo codes:
+    0 No chemo
+    1 Chemo
+
+Modality codes:
+    1 3D
+    2 IMRT
+
 @author: Michael
 """
 
@@ -105,6 +113,12 @@ def read_data(file_path):
 
     data['Gender'] = data['Gender'].astype("category")
     data['Gender'].cat.categories = ['Male', 'Female']
+
+    data['Chemo'] = data['Chemo'].astype("category")
+    data['Chemo'].cat.categories = ['No chemo', 'Chemo']
+
+    data['Modality'] = data['Modality'].astype("category")
+    data['Modality'].cat.categories = ['3D', 'IMRT']
 
     data.set_index('Patient')
 

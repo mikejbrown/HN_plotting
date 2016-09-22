@@ -26,6 +26,7 @@ def output_fig(name, save_figs, base_path="images", **kwargs):
         if not (os.path.exists(dname) and os.path.isdir(dname)):
             os.mkdir(dname)
         try:
+            print("Saving image %s" % fname)
             plt.savefig(fname, **kwargs)
         except:
             raise RuntimeError("Could not save image {0}".format(fname))
@@ -51,18 +52,26 @@ def do_plots_for_variable(var, save_figs, **plot_options):
     ## Bar plots with error bars
     cols2 = cols.copy()
     cols2.insert(0, 'Category')
-    grouped_data = DATA[cols2].groupby('Category')
-    means = grouped_data.mean()
-    means.columns = time_point_labels
-    means = means
-    errors = grouped_data.std()
-    errors.columns = time_point_labels
-    errors = errors
-    _, axes = plt.subplots()
-    means.plot.bar(yerr=errors, ax=axes)
-    plt.title(r'%s ($1 \sigma$ error bars)'%var)
-    plt.legend(loc=(1.1, 0.2))
-    output_fig('%s-barplot-errorbar.png'%var, save_figs, **plot_options)
+
+    mask = DATA.Patient > 0 # trivial mask
+    title = r'%s ($1 \sigma$ error bars)' % var
+    _do_plot(var, mask, title, save_figs, plot_options)
+
+    mask = DATA.Chemo == 'No chemo'
+    title = r'%s no chemo ($1 \sigma$ error bars)' % var
+    _do_plot(var, mask, title, save_figs, plot_options)
+
+    mask = DATA.Chemo == 'Chemo'
+    title = r'%s chemo ($1 \sigma$ error bars)' % var
+    _do_plot(var, mask, title, save_figs, plot_options)
+
+    mask = DATA.Modality == '3D'
+    title = r'%s 3D ($1 \sigma$ error bars)' % var
+    _do_plot(var, mask, title, save_figs, plot_options)
+
+    mask = DATA.Modality == 'IMRT'
+    title = r'%s IMRT ($1 \sigma$ error bars)' % var
+    _do_plot(var, mask, title, save_figs, plot_options)
 
     ## Histograms
     cols_data = DATA[cols]
@@ -84,6 +93,32 @@ def do_plots_for_variable(var, save_figs, **plot_options):
         plt.title('Cumulative frequency of %s score -- %s' % (var, cat))
         output_fig('%s-%s-histogram.png' % (var, cat), save_figs, **plot_options)
         plt.clf()
+
+def _do_plot(var, mask, title, save_figs, plot_options):
+    """ A helper function to do a boxplot with errorbars for a masked data slice """
+    title_fields = title.replace(r'($1 \sigma$ error bars)', '').split()[:2]
+    fname = '-'.join(title_fields) + '-reduced-barplot-errorbar.png'
+    cols = time_points_for_variable(var)
+    cols.insert(0, 'Category')
+
+    time_point_labels = ["Baseline", "Wk 2", "Wk 4", "Wk 6", "FU 1", "FU 3", "FU 6", "FU 12"]
+    idx = (DATA.Category == 'Oral') | (DATA.Category == 'Oropharynx') | (DATA.Category == 'Larynx')
+
+    grouped_data = DATA[mask][idx][cols].groupby('Category')
+
+    means = grouped_data.mean()
+    means.columns = time_point_labels
+    means = means.loc[['Oral', 'Oropharynx', 'Larynx']]
+
+    errors = grouped_data.std()
+    errors.columns = time_point_labels
+    errors = errors.loc[['Oral', 'Oropharynx', 'Larynx']]
+
+    _, axes = plt.subplots()
+    means.plot.bar(yerr=errors, ax=axes)
+    plt.title(title)
+    plt.legend(loc=(1.1, 0.2))
+    output_fig(fname, save_figs, **plot_options)
 
 if __name__ == "__main__":
     DATA_FILE_PATH = "Taste_and_QOL_data.csv"
