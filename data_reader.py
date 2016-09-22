@@ -53,11 +53,29 @@ Category codes:
     6 Skin
     7 Larynx
 
+Gender codes:
+    0 Male
+    1 Female
+
 @author: Michael
 """
 
 import pandas as pd
 import numpy as np
+
+def output_analysis(results, name, save_analysis, base_path="analysis"):
+    """ If save_analysis == True, saves the analysis results as a file of name
+    'base_path/name'. If save_analysis == False, prints the results to the stdout."""
+    if save_analysis:
+        import os
+        fname = os.path.realpath(os.path.join(base_path, name))
+        dname = os.path.dirname(fname)
+        if not (os.path.exists(dname) and os.path.isdir(dname)):
+            os.mkdir(dname)
+        with open(fname, 'w') as f:
+            f.write(results)
+    else:
+        print(results)
 
 def read_data(file_path):
     """
@@ -85,6 +103,9 @@ def read_data(file_path):
     data['Category'] = data['Category'].astype("category")
     data['Category'].cat.categories = category_codes
 
+    data['Gender'] = data['Gender'].astype("category")
+    data['Gender'].cat.categories = ['Male', 'Female']
+
     data.set_index('Patient')
 
     return data
@@ -96,6 +117,7 @@ def time_points_for_variable(variable):
 
 if __name__ == "__main__":
     data_file_path = "Taste_and_QOL_data.csv"
+    save_analysis = True
 
     data = read_data(data_file_path)
 
@@ -107,3 +129,32 @@ if __name__ == "__main__":
 
     cols = ['Category',]
     cols.extend(time_points_for_variable('Taste'))
+    cols.extend(time_points_for_variable('Overall_QOL'))
+
+    summary = data[cols].groupby('Category').describe()
+    output_analysis(summary.to_csv(), 'summary-stats.csv', save_analysis)
+    summary_html = """
+    <html>
+        <head>
+            <title>Summary statistics</title>
+        </head>
+        <body>
+            %s
+        </body>
+    </html>
+    """ % summary.to_html()
+    output_analysis(summary_html, 'summary-stats.html', save_analysis)
+
+    summary2 = data.groupby(['Category', 'T', 'N', 'Gender']).size().sort_values(ascending=False).unstack()
+    output_analysis(summary2.to_csv(), 'summary-stats-frequency-by-staging.csv', save_analysis)
+    summary_html = """
+    <html>
+        <head>
+            <title>Summary statistics by staging</title>
+        </head>
+        <body>
+            %s
+        </body>
+    </html>
+    """ % summary2.to_html()
+    output_analysis(summary_html, 'summary-stats-frequency-by-staging.html', save_analysis)
