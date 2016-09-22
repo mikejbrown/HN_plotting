@@ -5,15 +5,15 @@ Created on Fri Sep 23 00:32:50 2016
 @author: Michael
 """
 
-import pandas as pd
-import numpy as np
+#import pandas as pd
+#import numpy as np
 import pylab as plt
 import matplotlib
 matplotlib.style.use('ggplot')
 
 from data_reader import read_data, time_points_for_variable
 
-default_plot_options = {'dpi': 128, 'bbox_inches': 'tight'}
+DEFAULT_PLOT_OPTIONS = {'dpi': 128, 'bbox_inches': 'tight'}
 
 def output_fig(name, save_figs, base_path="images", **kwargs):
     """ If save_figs == True, saves the figure as a file of name 'base_path/name'.
@@ -33,61 +33,63 @@ def output_fig(name, save_figs, base_path="images", **kwargs):
         plt.show()
 
 
-def do_plots_for_variable(var):
-    """ """
+def do_plots_for_variable(var, save_figs, **plot_options):
+    """ Make a set of plots for the data on variable var. """
     cols = time_points_for_variable(var)
     time_point_labels = ["Baseline", "Wk 2", "Wk 4", "Wk 6", "FU 1", "FU 3", "FU 6", "FU 12"]
 
     ## Boxplots for each category
-    for cat in data.Category.values.sort_values().unique():
-        cdata = data[data.Category==cat][cols]
+    plt.figure()
+    for cat in DATA.Category.values.sort_values().unique():
+        cdata = DATA[DATA.Category == cat][cols]
         cdata.columns = time_point_labels
-        plt.figure()
         cdata.boxplot()
-        plt.title('%s -- %s' % (var,cat))
-        output_fig('%s-%s-boxplot.png'%(var,cat), save_figs, **default_plot_options)
+        plt.title('%s -- %s' % (var, cat))
+        output_fig('%s-%s-boxplot.png'%(var, cat), save_figs, **plot_options)
+        plt.clf()
 
     ## Bar plots with error bars
     cols2 = cols.copy()
     cols2.insert(0, 'Category')
-    gb = data[cols2].groupby('Category')
-    means = gb.mean()
+    grouped_data = DATA[cols2].groupby('Category')
+    means = grouped_data.mean()
     means.columns = time_point_labels
     means = means
-    errors = gb.std()
+    errors = grouped_data.std()
     errors.columns = time_point_labels
     errors = errors
-    fig, ax = plt.subplots()
-    means.plot.bar(yerr=errors, ax=ax)
-    plt.title('%s ($1 \sigma$ error bars)'%var)
-    plt.legend(loc=(1.1,0.2))
-    output_fig('%s-barplot-errorbar.png'%var, save_figs, **default_plot_options)
+    _, axes = plt.subplots()
+    means.plot.bar(yerr=errors, ax=axes)
+    plt.title(r'%s ($1 \sigma$ error bars)'%var)
+    plt.legend(loc=(1.1, 0.2))
+    output_fig('%s-barplot-errorbar.png'%var, save_figs, **plot_options)
 
     ## Histograms
-    dc = data[cols]
-    dc.columns = time_point_labels
+    cols_data = DATA[cols]
+    cols_data.columns = time_point_labels
     plt.figure()
-    dc.plot.hist(stacked=True, cumulative=True)
-    plt.legend(loc=(1.1,0.2))
+    cols_data.plot.hist(stacked=True, cumulative=True)
+    plt.legend(loc=(1.1, 0.2))
     plt.xlabel('%s'%var)
     plt.title('Cumulative frequency of %s score'%var)
-    output_fig('%s-histogram.png'%var, save_figs, **default_plot_options)
+    output_fig('%s-histogram.png'%var, save_figs, **plot_options)
 
-    for cat in data.Category.values.sort_values().unique():
-        dc = data[data.Category==cat][cols]
-        dc.columns = time_point_labels
-        plt.figure()
-        dc.plot.hist(stacked=True, cumulative=True)
-        plt.legend(loc=(1.1,0.2))
+    plt.figure()
+    for cat in DATA.Category.values.sort_values().unique():
+        cols_data = DATA[DATA.Category == cat][cols]
+        cols_data.columns = time_point_labels
+        cols_data.plot.hist(stacked=True, cumulative=True)
+        plt.legend(loc=(1.1, 0.2))
         plt.xlabel('%s'%var)
-        plt.title('Cumulative frequency of %s score -- %s' % (var,cat))
-        output_fig('%s-%s-histogram.png' % (var,cat), save_figs, **default_plot_options)
+        plt.title('Cumulative frequency of %s score -- %s' % (var, cat))
+        output_fig('%s-%s-histogram.png' % (var, cat), save_figs, **plot_options)
+        plt.clf()
 
 if __name__ == "__main__":
-    data_file_path = "Taste_and_QOL_data.csv"
-    save_figs = True
+    DATA_FILE_PATH = "Taste_and_QOL_data.csv"
+    SAVE_FIGS = True
 
-    data = read_data(data_file_path)
+    DATA = read_data(DATA_FILE_PATH)
 
-    do_plots_for_variable('Taste')
-    do_plots_for_variable('Overall_QOL')
+    do_plots_for_variable('Taste', SAVE_FIGS, **DEFAULT_PLOT_OPTIONS)
+    do_plots_for_variable('Overall_QOL', SAVE_FIGS, **DEFAULT_PLOT_OPTIONS)
