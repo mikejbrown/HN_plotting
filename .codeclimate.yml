@@ -26,4 +26,5 @@ ratings:
   - "**.py"
   - "**.rb"
   - "**.sh"
-exclude_paths: []
+exclude_paths:
+  - ".pylintrc"
