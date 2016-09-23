@@ -5,15 +5,14 @@ Created on Fri Sep 23 00:32:50 2016
 @author: Michael
 """
 
-#import pandas as pd
-#import numpy as np
 import pylab as plt
 import matplotlib
-matplotlib.style.use('ggplot')
-
 from data_reader import read_data, time_points_for_variable
 
+matplotlib.style.use('ggplot')
+
 DEFAULT_PLOT_OPTIONS = {'dpi': 128, 'bbox_inches': 'tight'}
+
 
 def output_fig(name, save_figs, base_path="images", **kwargs):
     """ If save_figs == True, saves the figure as a file of name 'base_path/name'.
@@ -37,23 +36,30 @@ def output_fig(name, save_figs, base_path="images", **kwargs):
 def do_plots_for_variable(var, save_figs, **plot_options):
     """ Make a set of plots for the data on variable var. """
     cols = time_points_for_variable(var)
-    time_point_labels = ["Baseline", "Wk 2", "Wk 4", "Wk 6", "FU 1", "FU 3", "FU 6", "FU 12"]
+    time_point_labels = ["Baseline",
+                         "Wk 2",
+                         "Wk 4",
+                         "Wk 6",
+                         "FU 1",
+                         "FU 3",
+                         "FU 6",
+                         "FU 12"]
 
-    ## Boxplots for each category
+    # Boxplots for each category
     plt.figure()
     for cat in DATA.Category.values.sort_values().unique():
         cdata = DATA[DATA.Category == cat][cols]
         cdata.columns = time_point_labels
         cdata.boxplot()
         plt.title('%s -- %s' % (var, cat))
-        output_fig('%s-%s-boxplot.png'%(var, cat), save_figs, **plot_options)
+        output_fig('%s-%s-boxplot.png' % (var, cat), save_figs, **plot_options)
         plt.clf()
 
-    ## Bar plots with error bars
+    # Bar plots with error bars
     cols2 = cols.copy()
     cols2.insert(0, 'Category')
 
-    mask = DATA.Patient > 0 # trivial mask
+    mask = DATA.Patient > 0  # trivial mask
     title = r'%s ($1 \sigma$ error bars)' % var
     _do_plot(var, mask, title, save_figs, plot_options)
 
@@ -73,15 +79,15 @@ def do_plots_for_variable(var, save_figs, **plot_options):
     title = r'%s IMRT ($1 \sigma$ error bars)' % var
     _do_plot(var, mask, title, save_figs, plot_options)
 
-    ## Histograms
+    # Histograms
     cols_data = DATA[cols]
     cols_data.columns = time_point_labels
     plt.figure()
     cols_data.plot.hist(stacked=True, cumulative=True)
     plt.legend(loc=(1.1, 0.2))
-    plt.xlabel('%s'%var)
-    plt.title('Cumulative frequency of %s score'%var)
-    output_fig('%s-histogram.png'%var, save_figs, **plot_options)
+    plt.xlabel('%s' % var)
+    plt.title('Cumulative frequency of %s score' % var)
+    output_fig('%s-histogram.png' % var, save_figs, **plot_options)
 
     plt.figure()
     for cat in DATA.Category.values.sort_values().unique():
@@ -89,20 +95,31 @@ def do_plots_for_variable(var, save_figs, **plot_options):
         cols_data.columns = time_point_labels
         cols_data.plot.hist(stacked=True, cumulative=True)
         plt.legend(loc=(1.1, 0.2))
-        plt.xlabel('%s'%var)
+        plt.xlabel('%s' % var)
         plt.title('Cumulative frequency of %s score -- %s' % (var, cat))
-        output_fig('%s-%s-histogram.png' % (var, cat), save_figs, **plot_options)
+        output_fig('%s-%s-histogram.png' % (var, cat),
+                   save_figs, **plot_options)
         plt.clf()
 
+
 def _do_plot(var, mask, title, save_figs, plot_options):
-    """ A helper function to do a boxplot with errorbars for a masked data slice """
+    """ A helper function to do a boxplot with errorbars for masked data. """
     title_fields = title.replace(r'($1 \sigma$ error bars)', '').split()[:2]
     fname = '-'.join(title_fields) + '-reduced-barplot-errorbar.png'
     cols = time_points_for_variable(var)
     cols.insert(0, 'Category')
 
-    time_point_labels = ["Baseline", "Wk 2", "Wk 4", "Wk 6", "FU 1", "FU 3", "FU 6", "FU 12"]
-    idx = (DATA.Category == 'Oral') | (DATA.Category == 'Oropharynx') | (DATA.Category == 'Larynx')
+    time_point_labels = ["Baseline",
+                         "Wk 2",
+                         "Wk 4",
+                         "Wk 6",
+                         "FU 1",
+                         "FU 3",
+                         "FU 6",
+                         "FU 12"]
+    idx = ((DATA.Category == 'Oral') |
+           (DATA.Category == 'Oropharynx') |
+           (DATA.Category == 'Larynx'))
 
     grouped_data = DATA[mask][idx][cols].groupby('Category')
 

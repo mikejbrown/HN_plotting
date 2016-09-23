@@ -71,9 +71,11 @@ Modality codes:
 import pandas as pd
 import numpy as np
 
+
 def output_analysis(results, name, save_analysis, base_path="analysis"):
     """ If save_analysis == True, saves the analysis results as a file of name
-    'base_path/name'. If save_analysis == False, prints the results to the stdout."""
+    'base_path/name'.
+    If save_analysis == False, prints the results to the stdout."""
     if save_analysis:
         import os
         fname = os.path.realpath(os.path.join(base_path, name))
@@ -85,10 +87,12 @@ def output_analysis(results, name, save_analysis, base_path="analysis"):
     else:
         print(results)
 
+
 def read_data(file_path):
     """
-    Reads the data from a csv file, appropriately munging null and missing values
-    and assigning category labels.
+    Reads the data from a csv file, appropriately munging null and missing
+    values and assigning category labels.
+
     Returns: a Pandas dataframe object containing the cleaned data.
     """
     non_numeric_fields = ['Diagnosis', 'DxCode', 'T', 'N', 'Side', 'Notes']
@@ -102,15 +106,15 @@ def read_data(file_path):
 
     data = pd.read_csv(file_path)
 
-    # some columns need explicit type conversion to numerics because the csv file
-    # has spaces which cause the field to be mis-parsed
+    # Some columns need explicit type conversion to numerics because the csv
+    # file has spaces which cause the field to be mis-parsed.
     # NOTE: pylint persistently complains about no member existing, because it
     # is stupid about recognizing pandas objects. Explicitly ignore the linter
     # checks here because _everything is fine_!
     # pylint: disable=E1103
     columns_which_need_munging = [c for c in data.columns
-                                  if data[c].dtype == np.dtype('O')
-                                  and c not in non_numeric_fields]
+                                  if data[c].dtype == np.dtype('O') and
+                                  c not in non_numeric_fields]
     # pylint: enable=E1103
     for col in columns_which_need_munging:
         data[col] = pd.to_numeric(data[col], errors='coerce')
@@ -138,8 +142,9 @@ def read_data(file_path):
 
     return data
 
+
 def time_points_for_variable(variable):
-    """ Returns a list of column names for the time points of a given variable. """
+    """ Returns a list of column names for the time points of a variable. """
     time_points = ['_B', '_W2', '_W4', '_W6', '_FU1', '_FU3', '_FU6', '_FU12']
     return [variable + tp for tp in time_points]
 
@@ -155,7 +160,7 @@ if __name__ == "__main__":
         print("*** Category: % s ***" % cat)
         print(cat_data[time_points_for_variable('Taste')].describe())
 
-    COLS = ['Category',]
+    COLS = ['Category', ]
     COLS.extend(time_points_for_variable('Taste'))
     COLS.extend(time_points_for_variable('Overall_QOL'))
 
@@ -175,7 +180,9 @@ if __name__ == "__main__":
 
     REDUCE_DATA = DATA.groupby(['Category', 'T', 'N', 'Gender'])
     SUMMARY2 = REDUCE_DATA.size().sort_values(ascending=False).unstack()
-    output_analysis(SUMMARY2.to_csv(), 'summary-stats-frequency-by-staging.csv', SAVE_ANALYSIS)
+    output_analysis(SUMMARY2.to_csv(),
+                    'summary-stats-frequency-by-staging.csv',
+                    SAVE_ANALYSIS)
     SUMMARY_HTML = """
     <html>
         <head>
@@ -186,4 +193,6 @@ if __name__ == "__main__":
         </body>
     </html>
     """ % SUMMARY2.to_html()
-    output_analysis(SUMMARY_HTML, 'summary-stats-frequency-by-staging.html', SAVE_ANALYSIS)
+    output_analysis(SUMMARY_HTML,
+                    'summary-stats-frequency-by-staging.html',
+                    SAVE_ANALYSIS)
