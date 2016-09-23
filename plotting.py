@@ -7,7 +7,7 @@ Created on Fri Sep 23 00:32:50 2016
 
 import pylab as plt
 import matplotlib
-from data_reader import read_data, time_points_for_variable
+from data_reader import read_data, time_points_for_variable, _mk_dir_if_needed
 
 matplotlib.style.use('ggplot')
 
@@ -19,11 +19,7 @@ def output_fig(name, save_figs, base_path="images", **kwargs):
     If save_figs == False, display the figure interactively instead.
     kwargs are passed onto matplotlib.pyplot.savefig unmodified"""
     if save_figs:
-        import os
-        fname = os.path.realpath(os.path.join(base_path, name))
-        dname = os.path.dirname(fname)
-        if not (os.path.exists(dname) and os.path.isdir(dname)):
-            os.mkdir(dname)
+        fname = _mk_dir_if_needed(name, base_path)
         try:
             print("Saving image %s" % fname)
             plt.savefig(fname, **kwargs)

@@ -77,11 +77,7 @@ def output_analysis(results, name, save_analysis, base_path="analysis"):
     'base_path/name'.
     If save_analysis == False, prints the results to the stdout."""
     if save_analysis:
-        import os
-        fname = os.path.realpath(os.path.join(base_path, name))
-        dname = os.path.dirname(fname)
-        if not (os.path.exists(dname) and os.path.isdir(dname)):
-            os.mkdir(dname)
+        fname = _mk_dir_if_needed(name, base_path)
         with open(fname, 'w') as file:
             file.write(results)
     else:
@@ -141,6 +137,17 @@ def read_data(file_path):
     data.set_index('Patient')
 
     return data
+
+
+def _mk_dir_if_needed(name, base_path):
+    """ Helper function that makes a dir for file saving if needed.
+    Returns the fully qualified filename. """
+    import os
+    fname = os.path.realpath(os.path.join(base_path, name))
+    dname = os.path.dirname(fname)
+    if not (os.path.exists(dname) and os.path.isdir(dname)):
+        os.mkdir(dname)
+    return fname
 
 
 def time_points_for_variable(variable):
