@@ -13,11 +13,11 @@ Licensed under the MIT license (see the LICENSE file for more detail).
 Requirements
 ============
 
-- Python 3
+- [Python 3](https://www.python.org/)
   - Tested with 3.5.2.
-- pandas
+- [pandas](http://pandas.pydata.org/)
   - Tested with 0.18.0.
-- matplotlib
+- [matplotlib](http://matplotlib.org/)
   - Tested with 1.5.1.
 
 You may run the full analysis suite simply by using
