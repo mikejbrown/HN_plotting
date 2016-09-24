@@ -76,14 +76,20 @@ import numpy as np
 from common import output_analysis
 
 
+def rand_ints_in_range(low, high, num):
+    """ Return an array of size num integers randomly distrubuted between
+    low and high (inclusive). """
+    return np.random.randint(low, high+1, size=num)
+
+
 def prepare_synthetic_data(num_patients=100, seed=534454546):
     """ Prepare a synthetic data set to mimic the real one for testing. """
     num_pts = num_patients
     np.random.seed(seed)
     data = pd.DataFrame({'Patient': pd.Series(np.arange(1, num_pts+1))})
-    data['AgeatRecruit'] = pd.Series(np.random.randint(40, 80+1, size=num_pts))
+    data['AgeatRecruit'] = pd.Series(rand_ints_in_range(40, 80, num_pts))
     data['Dose'] = pd.Series(np.random.random_sample(size=num_pts) * 15 + 60)
-    data['Fraction'] = pd.Series(np.random.randint(30, 36+1, size=num_pts))
+    data['Fraction'] = pd.Series(rand_ints_in_range(30, 36, num_pts))
 
     boolean_fields = "Gender Chemo Modality filter_$".split()
     for field in boolean_fields:
@@ -166,12 +172,12 @@ def prepare_synthetic_data(num_patients=100, seed=534454546):
                     Overall_QOL_FU6
                     Overall_QOL_FU12""".split()
     for field in score_fields:
-        data[field] = pd.Series(np.random.randint(0, 100+1, size=num_pts))
+        data[field] = pd.Series(rand_ints_in_range(0, 100, num_pts))
         num_nans_in_field = np.random.choice([0, 0, 0, 0, 1, 1, 2])
-        indices = np.random.randint(0, num_pts, size=num_nans_in_field)
+        indices = rand_ints_in_range(0, num_pts-1, num_nans_in_field)
         data[field].iloc[indices] = np.nan
         num_missing_in_field = np.random.choice([0, 0, 0, 1, 1, 1, 2, 2, 3])
-        indices = np.random.randint(0, num_pts, size=num_missing_in_field)
+        indices = rand_ints_in_range(0, num_pts-1, num_missing_in_field)
         data[field].iloc[indices] = 99999
     data.fillna(value=' ')
 
