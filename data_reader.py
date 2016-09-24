@@ -71,7 +71,8 @@ Modality codes:
 import pandas as pd
 import numpy as np
 
-from common import get_data_file_path, output_analysis, time_points_for_variable
+from common import get_data_file_path, output_analysis
+from common import time_points_for_variable
 
 
 def read_data(file_path):
