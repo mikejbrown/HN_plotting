@@ -4,9 +4,6 @@ Created on Sat Sep 24 14:02:49 2016
 
 @author: Michael
 """
-
-import pandas as pd
-import numpy as np
 import pylab as plt
 
 
@@ -22,13 +19,11 @@ def get_data_file_path():
 
     if args.use_synthetic:
         print("Using synthetic data")
-        DATA_FILE_PATH = "data/synthetic-data.csv"
+        return "data/synthetic-data.csv"
     if args.file:
-        DATA_FILE_PATH = args.file
+        return args.file
     else:
-        DATA_FILE_PATH = "Taste_and_QOL_data.csv"
-
-    return DATA_FILE_PATH
+        return "Taste_and_QOL_data.csv"
 
 
 def output_analysis(results, name, save_analysis, base_path="analysis"):
