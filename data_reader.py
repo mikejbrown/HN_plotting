@@ -71,17 +71,7 @@ Modality codes:
 import pandas as pd
 import numpy as np
 
-
-def output_analysis(results, name, save_analysis, base_path="analysis"):
-    """ If save_analysis == True, saves the analysis results as a file of name
-    'base_path/name'.
-    If save_analysis == False, prints the results to the stdout."""
-    if save_analysis:
-        fname = _mk_dir_if_needed(name, base_path)
-        with open(fname, 'w') as file:
-            file.write(results)
-    else:
-        print(results)
+from common import get_data_file_path, output_analysis, time_points_for_variable
 
 
 def read_data(file_path):
@@ -139,24 +129,8 @@ def read_data(file_path):
     return data
 
 
-def _mk_dir_if_needed(name, base_path):
-    """ Helper function that makes a dir for file saving if needed.
-    Returns the fully qualified filename. """
-    import os
-    fname = os.path.realpath(os.path.join(base_path, name))
-    dname = os.path.dirname(fname)
-    if not (os.path.exists(dname) and os.path.isdir(dname)):
-        os.mkdir(dname)
-    return fname
-
-
-def time_points_for_variable(variable):
-    """ Returns a list of column names for the time points of a variable. """
-    time_points = ['_B', '_W2', '_W4', '_W6', '_FU1', '_FU3', '_FU6', '_FU12']
-    return [variable + tp for tp in time_points]
-
 if __name__ == "__main__":
-    DATA_FILE_PATH = "Taste_and_QOL_data.csv"
+    DATA_FILE_PATH = get_data_file_path()
     SAVE_ANALYSIS = True
 
     DATA = read_data(DATA_FILE_PATH)

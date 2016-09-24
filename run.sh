@@ -1,5 +1,5 @@
 #!/bin/sh
 
-python data_reader.py
-python plotting.py
-
+python synthetic_data_gen.py
+python data_reader.py --use-synthetic
+python plotting.py --use-synthetic

@@ -7,26 +7,12 @@ Created on Fri Sep 23 00:32:50 2016
 
 import pylab as plt
 import matplotlib
-from data_reader import read_data, time_points_for_variable, _mk_dir_if_needed
+from data_reader import read_data
+from common import get_data_file_path, output_fig, time_points_for_variable
 
 matplotlib.style.use('ggplot')
 
 DEFAULT_PLOT_OPTIONS = {'dpi': 128, 'bbox_inches': 'tight'}
-
-
-def output_fig(name, save_figs, base_path="images", **kwargs):
-    """ If save_figs == True, saves the figure as a file of name 'base_path/name'.
-    If save_figs == False, display the figure interactively instead.
-    kwargs are passed onto matplotlib.pyplot.savefig unmodified"""
-    if save_figs:
-        fname = _mk_dir_if_needed(name, base_path)
-        try:
-            print("Saving image %s" % fname)
-            plt.savefig(fname, **kwargs)
-        except:
-            raise RuntimeError("Could not save image {0}".format(fname))
-    else:
-        plt.show()
 
 
 def do_plots_for_variable(var, save_figs, **plot_options):
@@ -134,7 +120,8 @@ def _do_plot(var, mask, title, save_figs, plot_options):
     output_fig(fname, save_figs, **plot_options)
 
 if __name__ == "__main__":
-    DATA_FILE_PATH = "Taste_and_QOL_data.csv"
+    DATA_FILE_PATH = get_data_file_path()
+
     SAVE_FIGS = True
 
     DATA = read_data(DATA_FILE_PATH)

@@ -73,7 +73,7 @@ Modality codes:
 import pandas as pd
 import numpy as np
 
-from data_reader import output_analysis
+from common import output_analysis
 
 
 def prepare_synthetic_data(num_patients=100, seed=534454546):
