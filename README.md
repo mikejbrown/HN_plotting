@@ -34,3 +34,18 @@ $ ./run-in-venv.sh
 
 Note: you may need to edit some paths in this script depending on your platform.
 
+Note: the above commands assume that you want to use the synthetic data set.
+If you have a real data set to process, you need to modify the procedure slightly.
+
+* Make sure the output directories are clean (not strictly necessary, but helpful):
+```sh
+$ rm analysis/* images/*
+```
+* Run one or both scripts using the `--file` option:
+```sh
+$ python data_reader.py --file myfile.csv
+$ python plotting.py --file myfile.csv
+```
+
+If you don't use either of the `--use-synthetic` or `--file` options, the data file
+`Taste_and_QOL_data.csv` (which is not tracked by the repo) is used by default.
