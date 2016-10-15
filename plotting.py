@@ -133,7 +133,7 @@ def _do_plot(var, mask, title, save_figs, plot_options):
     gp_data = gp_data.T
     #print(gp_data)
     gp_data.plot(style=['r-','r--','g-','g--','b-','b--'])
-    plt.title(' '.join(title_fields))
+    plt.title(title.replace(r'($1 \sigma$ error bars)', ''))
     plt.legend(['Oral mean', 'Oral mode', 'Oropharynx mean', 'Oropharynx mode', 'Larynx mean', 'Larynx mode'],loc=(1.1, 0.2))
     output_fig(fname, save_figs, **plot_options)
 
