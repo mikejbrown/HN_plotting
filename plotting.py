@@ -7,6 +7,10 @@ Created on Fri Sep 23 00:32:50 2016
 
 import pylab as plt
 import matplotlib
+from scipy.stats.mstats import mode
+import numpy as np
+#import pandas as pd
+
 from data_reader import read_data
 from common import get_data_file_path, output_fig, time_points_for_variable
 
@@ -117,6 +121,20 @@ def _do_plot(var, mask, title, save_figs, plot_options):
     means.plot.bar(yerr=errors, ax=axes)
     plt.title(title)
     plt.legend(loc=(1.1, 0.2))
+    output_fig(fname, save_figs, **plot_options)
+
+    fname = '-'.join(title_fields) + '-reduced-lineplot.png'
+    plt.figure()
+    f = lambda x: mode(x)[0][0]
+    gp_data = grouped_data.agg([np.mean, f])
+    gp_data = gp_data.loc[['Oral', 'Oropharynx', 'Larynx']]
+    gp_data = gp_data.T.unstack(1).T
+    gp_data.columns = time_point_labels
+    gp_data = gp_data.T
+    #print(gp_data)
+    gp_data.plot(style=['r-','r--','g-','g--','b-','b--'])
+    plt.title(' '.join(title_fields))
+    plt.legend(['Oral mean', 'Oral mode', 'Oropharynx mean', 'Oropharynx mode', 'Larynx mean', 'Larynx mode'],loc=(1.1, 0.2))
     output_fig(fname, save_figs, **plot_options)
 
 if __name__ == "__main__":
