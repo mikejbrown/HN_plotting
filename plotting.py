@@ -8,13 +8,13 @@ Created on Fri Sep 23 00:32:50 2016
 import pylab as plt
 import matplotlib
 from scipy.stats.mstats import mode
-import numpy as np
-#import pandas as pd
 
 from data_reader import read_data
 from common import get_data_file_path, output_fig, time_points_for_variable
 
 matplotlib.style.use('ggplot')
+matplotlib.rc('figure', figsize=[9, 4])
+matplotlib.rc('font', size=16)
 
 DEFAULT_PLOT_OPTIONS = {'dpi': 128, 'bbox_inches': 'tight'}
 
@@ -80,7 +80,7 @@ def do_plots_for_variable(var, save_figs, **plot_options):
         cols_data = DATA[DATA.Category == cat][cols]
         cols_data.columns = time_point_labels
         cols_data.plot.hist(stacked=True, cumulative=True)
-        plt.legend(loc=(1.1, 0.2))
+        plt.legend(loc=(1.1, -0.1))
         plt.xlabel('%s' % var)
         plt.title('Cumulative frequency of %s score -- %s' % (var, cat))
         output_fig('%s-%s-histogram.png' % (var, cat),
@@ -120,21 +120,27 @@ def _do_plot(var, mask, title, save_figs, plot_options):
     _, axes = plt.subplots()
     means.plot.bar(yerr=errors, ax=axes)
     plt.title(title)
-    plt.legend(loc=(1.1, 0.2))
+    plt.legend(loc=(1.1, -0.1))
     output_fig(fname, save_figs, **plot_options)
 
-    fname = '-'.join(title_fields) + '-reduced-lineplot.png'
+    fname = '-'.join(title_fields) + '-mean-reduced-lineplot.png'
     plt.figure()
-    f = lambda x: mode(x)[0][0]
-    gp_data = grouped_data.agg([np.mean, f])
+    means.T.plot(style=['r-', 'g-', 'b-'])
+    plt.title(title.replace(r'($1 \sigma$ error bars)', '') + ' mean')
+    plt.axis([0, len(time_point_labels)-1, 0, 100])
+    plt.legend(['Oral', 'Oropharynx', 'Larynx'], loc=(1.1, 0.2))
+    output_fig(fname, save_figs, **plot_options)
+
+    fname = '-'.join(title_fields) + '-mode-reduced-lineplot.png'
+    plt.figure()
+    gp_data = grouped_data.agg(lambda x: mode(x)[0][0])
     gp_data = gp_data.loc[['Oral', 'Oropharynx', 'Larynx']]
-    gp_data = gp_data.T.unstack(1).T
     gp_data.columns = time_point_labels
     gp_data = gp_data.T
-    #print(gp_data)
-    gp_data.plot(style=['r-','r--','g-','g--','b-','b--'])
-    plt.title(title.replace(r'($1 \sigma$ error bars)', ''))
-    plt.legend(['Oral mean', 'Oral mode', 'Oropharynx mean', 'Oropharynx mode', 'Larynx mean', 'Larynx mode'],loc=(1.1, 0.2))
+    gp_data.plot(style=['r-', 'g-', 'b-'])
+    plt.title(title.replace(r'($1 \sigma$ error bars)', '') + ' mode')
+    plt.axis([0, len(time_point_labels)-1, 0, 100])
+    plt.legend(['Oral', 'Oropharynx', 'Larynx'], loc=(1.1, 0.2))
     output_fig(fname, save_figs, **plot_options)
 
 if __name__ == "__main__":
