@@ -7,6 +7,7 @@ Created on Fri Sep 23 00:32:50 2016
 
 import pylab as plt
 import matplotlib
+import pandas as pd
 from scipy.stats.mstats import mode
 
 from data_reader import read_data
@@ -65,7 +66,52 @@ def do_plots_for_variable(var, save_figs, **plot_options):
     title = r'%s IMRT ($1 \sigma$ error bars)' % var
     _do_plot(var, mask, title, save_figs, plot_options)
 
+    idx = ((DATA.Category == 'Oral') |
+           (DATA.Category == 'Oropharynx') |
+           (DATA.Category == 'Larynx'))
+    cols.insert(0, 'Category')
+    grouped_nochemo_data = DATA[DATA.Chemo == 'No chemo'][idx][cols].groupby('Category')
+    grouped_chemo_data = DATA[DATA.Chemo == 'Chemo'][idx][cols].groupby('Category')
+
+    means_nochemo = grouped_nochemo_data.mean()
+    means_chemo = grouped_chemo_data.mean()
+    means_nochemo.columns = time_point_labels
+    means_chemo.columns = time_point_labels
+    means_nochemo = means_nochemo.loc[['Oral', 'Oropharynx', 'Larynx']]
+    means_chemo = means_chemo.loc[['Oral', 'Oropharynx', 'Larynx']]
+
+    fname = '%s-oral-chemo-vs-nochemo-mean-reduced-lineplot.png' % var
+    plt.figure()
+    data = pd.DataFrame({'no chemo': means_nochemo.loc['Oral'],
+                         'chemo': means_chemo.loc['Oral']})
+    data.plot()
+    plt.title('%s Oral mean - chemo vs no chemo' % var)
+    plt.axis([0, len(time_point_labels)-1, -1, 101])
+    plt.legend(loc=(1.1, 0.2))
+    output_fig(fname, save_figs, **plot_options)
+
+    fname = '%s-oropharynx-chemo-vs-nochemo-mean-reduced-lineplot.png' % var
+    plt.figure()
+    data = pd.DataFrame({'no chemo': means_nochemo.loc['Oropharynx'],
+                         'chemo': means_chemo.loc['Oropharynx']})
+    data.plot()
+    plt.title('%s Oropharynx mean - chemo vs no chemo' % var)
+    plt.axis([0, len(time_point_labels)-1, -1, 101])
+    plt.legend(loc=(1.1, 0.2))
+    output_fig(fname, save_figs, **plot_options)
+
+    fname = '%s-larynx-chemo-vs-nochemo-mean-reduced-lineplot.png' % var
+    plt.figure()
+    data = pd.DataFrame({'no chemo': means_nochemo.loc['Larynx'],
+                         'chemo': means_chemo.loc['Larynx']})
+    data.plot()
+    plt.title('%s Larynx mean - chemo vs no chemo' % var)
+    plt.axis([0, len(time_point_labels)-1, -1, 101])
+    plt.legend(loc=(1.1, 0.2))
+    output_fig(fname, save_figs, **plot_options)
+
     # Histograms
+    cols = time_points_for_variable(var)
     cols_data = DATA[cols]
     cols_data.columns = time_point_labels
     plt.figure()
@@ -92,6 +138,7 @@ def _do_plot(var, mask, title, save_figs, plot_options):
     """ A helper function to do a boxplot with errorbars for masked data. """
     title_fields = title.replace(r'($1 \sigma$ error bars)', '').split()[:2]
     fname = '-'.join(title_fields) + '-reduced-barplot-errorbar.png'
+    spread = .5
     cols = time_points_for_variable(var)
     cols.insert(0, 'Category')
 
@@ -125,9 +172,12 @@ def _do_plot(var, mask, title, save_figs, plot_options):
 
     fname = '-'.join(title_fields) + '-mean-reduced-lineplot.png'
     plt.figure()
+    means.loc['Oral']=means.loc['Oral']-spread
+    means.loc['Oropharynx']=means.loc['Oropharynx']+0
+    means.loc['Larynx']=means.loc['Larynx']+spread
     means.T.plot(style=['r-', 'g-', 'b-'])
     plt.title(title.replace(r'($1 \sigma$ error bars)', '') + ' mean')
-    plt.axis([0, len(time_point_labels)-1, 0, 100])
+    plt.axis([0, len(time_point_labels)-1, -1, 101])
     plt.legend(['Oral', 'Oropharynx', 'Larynx'], loc=(1.1, 0.2))
     output_fig(fname, save_figs, **plot_options)
 
@@ -136,10 +186,13 @@ def _do_plot(var, mask, title, save_figs, plot_options):
     gp_data = grouped_data.agg(lambda x: mode(x)[0][0])
     gp_data = gp_data.loc[['Oral', 'Oropharynx', 'Larynx']]
     gp_data.columns = time_point_labels
+    gp_data.loc['Oral']=gp_data.loc['Oral']-spread
+    gp_data.loc['Oropharynx']=gp_data.loc['Oropharynx']+0
+    gp_data.loc['Larynx']=gp_data.loc['Larynx']+spread
     gp_data = gp_data.T
     gp_data.plot(style=['r-', 'g-', 'b-'])
     plt.title(title.replace(r'($1 \sigma$ error bars)', '') + ' mode')
-    plt.axis([0, len(time_point_labels)-1, 0, 100])
+    plt.axis([0, len(time_point_labels)-1, -1, 101])
     plt.legend(['Oral', 'Oropharynx', 'Larynx'], loc=(1.1, 0.2))
     output_fig(fname, save_figs, **plot_options)
 
